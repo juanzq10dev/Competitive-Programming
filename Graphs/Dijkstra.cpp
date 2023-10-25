@@ -1,98 +1,75 @@
 #include <bits/stdc++.h>
 
-using namespace std;
+using namespace std; 
 
-#define int long long int
-#define MAX 1001
+#define int long long int 
+#define MAX 1001 
 
-/* 
-* Get the min path from a vertex to other. 
-* Run dijkstra(s) before running all methods. 
-* Methods where done to put real values, no need to sum or substract anything. 
-*/
-
-int n, m; // n = num of vertex, m = num of paths.
-vector<pair<int, int>> adj[MAX];
+int n, m; 
+int dist[MAX]; 
+vector<pair<int, int>> adj[MAX]; 
+int par[MAX]; // Removed if path not needed
 bool visited[MAX];
-int dist[MAX];
-vector<int> path[MAX]; // To get min path
 
-void dijkstra(int s) { // s means src
-    s--;
 
-    for (int i = 0; i < n; i++) {
-        visited[i] = false;
-        dist[i] = INT_MAX;
+void dijkstra(int s) { // boolean dijkstra(int s, int d)
+    for (int i = 1; i <= n; i++) {
+        dist[i] = INFINITY; 
+        visited[i] = false; 
     }
 
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> q;
-    dist[s] = 0;
-    q.push({ s, dist[s] });
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
 
-    while (!q.empty()) {
-        int v = q.top().first;
-        q.pop();
-        if (visited[v]) {
-            continue;
-        }
+    dist[s] = 0; 
+    par[s] = -1; 
 
-        visited[v] = true;
+    pq.push({ dist[s], s}); 
+
+    while (!pq.empty()) {
+        int v = pq.top().second; 
+
+        // if (v == d) return true;
+
+        pq.pop(); 
+
+        visited[v] = true; 
+
         for (auto const& a : adj[v]) {
-            int u = a.first;
-            int w = a.second;
+            int u = a.first; 
+            int w = a.second; 
 
-            if (dist[u] > dist[v] + w) {
+            if (!visited[u] && dist[v] + w < dist[u] ) {
                 dist[u] = dist[v] + w;
-
-                path[u] = path[v]; // To get min path 
-                path[u].push_back(v + 1); // To get min path 
-
-                q.push({ u, dist[u] });
+                pq.push({ dist[u], u} );
+                par[u] = v; // Remove if path not needed
             }
-        }
+        } 
+
     }
+
+    // return false; 
 }
 
-int min_weight(int d) { // Returns min weight from src to d. 
-    d--;
-    return dist[d];
-}
+vector<int> min_path(int d) {
+    vector<int> path; 
 
-void print_all_min_weights() {
-    for (int i = 0; i < n; i++) {
-        cout << "Minimum weight from src to " << (i + 1) << ": " << dist[i] << '\n';
+    while (d != - 1) {
+        path.push_back(d); 
+        d = par[d]; 
     }
-}
 
-vector<int> min_path(int d) { // Returns min weight from src to d. 
-    d--; 
-
-    return path[d];
-}
-
-void print_all_min_paths() {
-
-    for (int i = 0; i < n; i++) {
-        vector<int> min_path = path[i];
-
-        cout << "Min path from src to " << i + 1 << ": ";
-        for (int v : min_path) {
-            cout << v << " ";
-        }
-        cout << '\n';
-    }
+    reverse(path.begin(), path.end()); 
+    return path; 
 }
 
 signed main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    cin >> n >> m;
-
+    cin >> n >> m; 
+    
     for (int i = 0; i < m; i++) {
-        int v1, v2, w;
-        cin >> v1 >> v2 >> w;
-        v1--; v2--;
-        adj[v1].push_back({ v2, w });
-        adj[v2].push_back({ v1, w });
+        int u, v, w; 
+        cin >> u >> v >> w; 
+
+        adj[u].push_back({ v, w }); 
+        adj[v].push_back({ u, w }); 
     }
 }
